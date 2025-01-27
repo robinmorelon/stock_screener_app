@@ -44,9 +44,9 @@ def calcul_DCF(ticker, hypothese_croissance, price_fcf_attendu):
             "Prix final": round(final_price, 2), "Fair price": round(fair_price, 2), "CACGR": round(CACGR, 2)}
     return dico
 
-def plot(ticker, fair_price):
+def plot(ticker, fair_price, periode="10y"):
     stock = yf.Ticker(ticker)
-    stock_history = stock.history(period="10y", interval="1wk")
+    stock_history = stock.history(period=periode, interval="1wk")
     stock_history = stock_history.reset_index()
     #st.line_chart(stock_history, x=stock_history['Datetime'], y=stock_history['Open'])
     #st.line_chart(stock_history.set_index("Date")["Open"])
@@ -74,6 +74,11 @@ if st.button("Calculate fair price"):
     styled_df = df.style.format(precision=2).applymap(color_CACGR, subset=["CACGR"])
     st.dataframe(styled_df,hide_index=True, width=800)
     plot(tickers, dico["Fair price"])
+
+periode = st.selectbox("Changez la période du graphique :",("10y", "5y", "1y"))
+if periode:
+    dico = calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu)
+    plot(tickers, dico["Fair price"], periode)
 
 
 
