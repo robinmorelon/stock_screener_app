@@ -13,16 +13,14 @@ st.write("Evaluation du prix en fonction de l'augmentation du FCF.")
 
 # Entrée utilisateur
 tickers = st.text_input("Entrez un ticker (ex : AAPL) :")
-#tickers = [ticker.strip() for ticker in tickers.split(",")]
+
 
 hypothese_croissance = st.slider("Entrez l'hypothése de croissance (ex : 20) : ",0,100)
-#hypothese_croissance = [hc.strip() for hc in hypothese_croissance.split(",")]
-#hypothese_croissance = [int(hc) for hc in hypothese_croissance]
+
 
 
 price_fcf_attendu = st.slider("Entrez le P/FCF attendu : ",0,100)
-#price_fcf_attendu = [pf.strip() for pf in price_fcf_attendu.split(",")]
-#price_fcf_attendu = [int(pf) for pf in price_fcf_attendu]
+
 
 rendement = st.slider("Entrez le rendement minimum souhaité (12 par défaut) :", value=12)
 
@@ -48,8 +46,6 @@ def plot(ticker, fair_price, periode="10y"):
     stock = yf.Ticker(ticker)
     stock_history = stock.history(period=periode, interval="1wk")
     stock_history = stock_history.reset_index()
-    #st.line_chart(stock_history, x=stock_history['Datetime'], y=stock_history['Open'])
-    #st.line_chart(stock_history.set_index("Date")["Open"])
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(stock_history['Date'], stock_history['Open'], label="Prix d'ouverture", color="blue")
     ax.axhline(y=fair_price, color="red", linestyle="--", label=f"Prix juste = {fair_price}")
@@ -62,7 +58,6 @@ def plot(ticker, fair_price, periode="10y"):
 
 
 if st.button("Calculate fair price"):
-    #st.write(calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu))
     dico = calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu)
     df = pd.DataFrame([dico])
     def color_CACGR(x):
@@ -70,10 +65,8 @@ if st.button("Calculate fair price"):
             return "background-color: green;"
         else:
             return "background-color: red;"
-    #styled_df = df.style.format(precision=2).highlight_between(subset=["CACGR"], color="green", axis=1, left=12)
     styled_df = df.style.format(precision=2).applymap(color_CACGR, subset=["CACGR"])
     st.dataframe(styled_df,hide_index=True, width=800)
-    plot(tickers, dico["Fair price"])
 
 periode = st.selectbox("Changez la période du graphique :",("10y", "5y", "1y"))
 if periode:
