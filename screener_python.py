@@ -16,19 +16,25 @@ def calculate_historical_metrics(ticker):
     return financial_data, cashflow_data, historical_data
 
 def plot_net_income(net_income):
+    st.subheader('Bénéfices Net')
+    tab1, tab2 = st.tabs(["📈 Bar Chart", "🗃 Data"])
     net_income.index = pd.to_datetime(net_income.index).year
-    st.write("Bénéfices Net")
-    st.bar_chart(net_income)
+    tab1.bar_chart(net_income)
+    tab2.write(net_income)
 
 def plot_revenue(revenue):
+    st.subheader("Chiffre d'affaires")
+    tab1, tab2 = st.tabs(["📈 Bar Chart", "🗃 Data"])
     revenue.index = pd.to_datetime(revenue.index).year
-    st.write("Chiffre d'affaires")
-    st.bar_chart(revenue)
+    tab1.bar_chart(revenue)
+    tab2.write(revenue)
 
 def plot_free_cashflow(free_cashflow):
+    st.subheader("Free Cash Flow")
+    tab1, tab2 = st.tabs(["📈 Bar Chart", "🗃 Data"])
     free_cashflow.index = pd.to_datetime(free_cashflow.index).year
-    st.write("Free Cashflow")
-    st.bar_chart(free_cashflow)
+    tab1.bar_chart(free_cashflow)
+    tab2.write(free_cashflow)
 
 # Interface utilisateur Streamlit
 st.title("📊 Screener Boursier Automatisé")
