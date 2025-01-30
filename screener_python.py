@@ -36,6 +36,18 @@ def plot_free_cashflow(free_cashflow):
     tab1.bar_chart(free_cashflow)
     tab2.write(free_cashflow)
 
+def plot_consensus(ticker):
+    stock = yf.Ticker(ticker)
+    st.subheader('Consensus')
+    recommendations = stock.get_recommendations().drop("period", axis=1)
+    x = recommendations.loc[0].index
+    y = recommendations.loc[0].values
+    fig, ax = plt.subplots()
+    ax.pie(y, labels=x, autopct=lambda t:f"{int(t)}", startangle=90)
+    ax.set_title(f"Consensus des analystes pour {ticker}")
+    st.pyplot(fig)
+
+
 # Interface utilisateur Streamlit
 st.title("📊 Screener Boursier Automatisé")
 ticker = st.text_input("Entrez un ticker (ex : AAPL) :")
@@ -44,3 +56,4 @@ if st.button("Analyser"):
     plot_revenue(financial_data.loc["Total Revenue"])
     plot_net_income(financial_data.loc["Net Income"])
     plot_free_cashflow(cashflow_data.loc["Free Cash Flow"])
+    plot_consensus(ticker)
