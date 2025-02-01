@@ -16,29 +16,38 @@ def calculate_historical_metrics(ticker):
     return financial_data, cashflow_data, historical_data
 
 def plot_net_income(net_income):
-    st.subheader('Bénéfices Net')
+    st.subheader('Bénéfices Net', divider="blue")
     tab1, tab2 = st.tabs(["📈 Bar Chart", "🗃 Data"])
     net_income.index = pd.to_datetime(net_income.index).year
     tab1.bar_chart(net_income)
     tab2.write(net_income)
 
 def plot_revenue(revenue):
-    st.subheader("Chiffre d'affaires")
+    st.subheader("Chiffre d'affaires", divider="blue")
     tab1, tab2 = st.tabs(["📈 Bar Chart", "🗃 Data"])
     revenue.index = pd.to_datetime(revenue.index).year
     tab1.bar_chart(revenue)
     tab2.write(revenue)
 
 def plot_free_cashflow(free_cashflow):
-    st.subheader("Free Cash Flow")
+    st.subheader("Free Cash Flow", divider="blue")
     tab1, tab2 = st.tabs(["📈 Bar Chart", "🗃 Data"])
     free_cashflow.index = pd.to_datetime(free_cashflow.index).year
     tab1.bar_chart(free_cashflow)
     tab2.write(free_cashflow)
 
+def consensus_color(consensus):
+    if consensus == "strongBuy" or consensus == "buy":
+        return "green"
+    elif consensus == "sell" or consensus == "strongSell":
+        return "red"
+    else:
+        return "gray"
+
 def plot_consensus(ticker):
     stock = yf.Ticker(ticker)
-    st.subheader('Consensus')
+    moyenne_recommendation = stock.get_info()["recommendationKey"]
+    st.subheader(f'Consensus : {moyenne_recommendation}', divider=consensus_color(moyenne_recommendation))
     recommendations = stock.get_recommendations().drop("period", axis=1)
     x = recommendations.loc[0].index
     y = recommendations.loc[0].values
@@ -47,12 +56,33 @@ def plot_consensus(ticker):
     ax.set_title(f"Consensus des analystes pour {ticker}")
     st.pyplot(fig)
 
+def summury(ticker):
+    stock = yf.Ticker(ticker)
+    st.subheader('À propos', divider="blue")
+    st.write(stock.get_info()["longBusinessSummary"])
+
+def converti_milliard(nb):
+    nb = str(nb)
+    if len(nb)>=10:
+        return str(nb[:(len(nb)-9)])+" Mds"
+    return str(nb)
+
+def metric(ticker):
+    stock = yf.Ticker(ticker)
+    pct_change = (stock.info["currentPrice"] * 100 / stock.info["regularMarketPreviousClose"] - 100) / 100
+    col1, col2, col3 = st.columns(3)
+    col1.metric(label="Prix actuel", value=str(stock.info["currentPrice"])+" "+stock.info["currency"], delta=(str(round(pct_change,2))+"%"))
+    col2.metric(label="Capitalisation boursière", value=converti_milliard(stock.info["marketCap"]))
+    col3.metric(label="Price/Earning Ratio", value=int(stock.info["trailingPE"]))
+
 
 # Interface utilisateur Streamlit
 st.title("📊 Screener Boursier Automatisé")
 ticker = st.text_input("Entrez un ticker (ex : AAPL) :")
 if st.button("Analyser"):
     financial_data, cashflow_data, historical_data = calculate_historical_metrics(ticker)
+    metric(ticker)
+    summury(ticker)
     plot_revenue(financial_data.loc["Total Revenue"])
     plot_net_income(financial_data.loc["Net Income"])
     plot_free_cashflow(cashflow_data.loc["Free Cash Flow"])
