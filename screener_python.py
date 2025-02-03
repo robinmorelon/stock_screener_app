@@ -69,7 +69,7 @@ def converti_milliard(nb):
 
 def metric(ticker):
     stock = yf.Ticker(ticker)
-    pct_change = (stock.info["currentPrice"] * 100 / stock.info["regularMarketPreviousClose"] - 100) / 100
+    pct_change = (stock.info["currentPrice"] * 100 / stock.info["regularMarketPreviousClose"] - 100)
     col1, col2, col3 = st.columns(3)
     col1.metric(label="Prix actuel", value=str(stock.info["currentPrice"])+" "+stock.info["currency"], delta=(str(round(pct_change,2))+"%"))
     col2.metric(label="Capitalisation boursière", value=converti_milliard(stock.info["marketCap"]))
