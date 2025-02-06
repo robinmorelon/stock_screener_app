@@ -15,7 +15,7 @@ st.write("Evaluation du prix en fonction de l'augmentation du FCF.")
 tickers = st.text_input("Entrez un ticker (ex : AAPL) :")
 
 
-hypothese_croissance = st.slider("Entrez l'hypothése de croissance (ex : 20) : ",0,100)
+hypothese_croissance = st.slider("Entrez l'hypothèse de croissance (ex : 20) : ",0,100)
 
 
 
