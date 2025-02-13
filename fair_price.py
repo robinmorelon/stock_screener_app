@@ -67,11 +67,11 @@ if st.button("Calculate fair price"):
             return "background-color: red;"
     styled_df = df.style.format(precision=2).applymap(color_CACGR, subset=["CACGR"])
     st.dataframe(styled_df,hide_index=True, width=800)
+    #plot(tickers, dico["Fair price"])
+    st.session_state["periode"] = "10y"
 
+if "periode" in st.session_state:
     periode = st.selectbox("Changez la période du graphique :",("10y", "5y", "1y"))
     if periode:
         dico = calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu)
         plot(tickers, dico["Fair price"], periode)
-
-
-
