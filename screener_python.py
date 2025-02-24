@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from screnner_python_console import stock
 
 
 def calculate_historical_metrics(ticker):
@@ -75,6 +76,29 @@ def metric(ticker):
     col2.metric(label="Capitalisation boursière", value=converti_milliard(stock.info["marketCap"]))
     col3.metric(label="Price/Earning Ratio", value=int(stock.info["trailingPE"]))
 
+def dividend(ticker):
+    stock = yf.Ticker(ticker)
+    st.subheader('Dividendes', divider="blue")
+    if len(stock.dividends)==0:
+        st.write("L'entreprise ne verse pas de dividendes")
+    else:
+        annual_dividends = stock.dividends.resample('Y').sum()
+        annual_dividends = annual_dividends.drop(annual_dividends.index[-1])
+        annual_dividends = annual_dividends.tail(5)
+        payout_ratio = stock.info["payoutRatio"]
+        croissance_dividends_5A = (annual_dividends.iloc[-1]*100 / annual_dividends.iloc[0] - 100) / 5
+        rendement = stock.info["dividendYield"]
+        fig, ax = plt.subplots()
+        ax.plot(pd.to_datetime(annual_dividends.index).year, annual_dividends.values, marker='o', linestyle='--')
+        ax.set_title('Dividendes')
+        ax.set_xticks(pd.to_datetime(annual_dividends.index).year)
+        plt.xlabel('Année')
+        plt.ylabel('Montant des dividendes')
+        st.pyplot(fig)
+        col1, col2, col3 = st.columns(3)
+        col1.metric(label="Payout Ratio", value=str(round(payout_ratio*100, 2))+" %")
+        col2.metric(label="Rendement", value=str(rendement)+" %")
+        col3.metric(label="Croissance sur 5 ans", value=str(round(croissance_dividends_5A,2))+" %")
 
 # Interface utilisateur Streamlit
 st.title("📊 Screener Boursier Automatisé")
@@ -87,3 +111,4 @@ if st.button("Analyser"):
     plot_net_income(financial_data.loc["Net Income"])
     plot_free_cashflow(cashflow_data.loc["Free Cash Flow"])
     plot_consensus(ticker)
+    dividend(ticker)
