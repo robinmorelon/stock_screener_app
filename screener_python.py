@@ -6,8 +6,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from screnner_python_console import stock
-
 
 def calculate_historical_metrics(ticker):
     stock = yf.Ticker(ticker)
