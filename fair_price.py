@@ -10,19 +10,17 @@ import matplotlib.pyplot as plt
 
 st.title("📊 Evaluation Fair Price")
 st.write("Evaluation du prix en fonction de l'augmentation du FCF.")
+st.caption("Une approche simple pour estimer la valeur réelle d'une action à partir du Free Cash Flow.")
+
 
 # Entrée utilisateur
-tickers = st.text_input("Entrez un ticker (ex : AAPL) :")
-
-
-hypothese_croissance = st.slider("Entrez l'hypothèse de croissance (ex : 20) : ",0,100)
-
-
-
-price_fcf_attendu = st.slider("Entrez le P/FCF attendu : ",0,100)
-
-
-rendement = st.slider("Entrez le rendement minimum souhaité (12 par défaut) :", value=12)
+tab1, tab2, tab3 = st.tabs(["⚙️ Paramètres", "📈 Résultats", "📊 Graphique"])
+with tab1:
+    st.subheader("⚙️ Paramètres d'analyse")
+    tickers = st.text_input("Entrez un ticker (ex : AAPL) :", value="AAPL")
+    hypothese_croissance = st.slider("Entrez l'hypothèse de croissance (ex : 20) : ",0,100)
+    price_fcf_attendu = st.slider("Entrez le P/FCF attendu : ",0,100)
+    rendement = st.slider("Entrez le rendement minimum souhaité (12 par défaut) :", value=12)
 
 def calcul_DCF(ticker, hypothese_croissance, price_fcf_attendu):
     stock = yf.Ticker(ticker)
@@ -57,21 +55,27 @@ def plot(ticker, fair_price, periode="10y"):
 
 
 
-if st.button("Calculate fair price"):
+if tickers:
     dico = calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu)
-    df = pd.DataFrame([dico])
-    def color_CACGR(x):
-        if x >= rendement:
-            return "background-color: green;"
-        else:
-            return "background-color: red;"
-    styled_df = df.style.format(precision=2).applymap(color_CACGR, subset=["CACGR"])
-    st.dataframe(styled_df,hide_index=True, width=800)
-    #plot(tickers, dico["Fair price"])
-    st.session_state["periode"] = "10y"
 
-if "periode" in st.session_state:
-    periode = st.selectbox("Changez la période du graphique :",("10y", "5y", "1y"))
-    if periode:
-        dico = calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu)
-        plot(tickers, dico["Fair price"], periode)
+    with tab2:
+        st.subheader("📈 Résultats de l'évaluation")
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("💵 Prix actuel", f"${dico['Prix actuel']}")
+        col2.metric("🎯 Fair Price", f"${dico['Fair price']}")
+        col3.metric("📈 CACGR (5 ans)", f"{dico['CACGR']}%",
+                    delta=f"{dico['CACGR'] - rendement:.2f}%" if dico['CACGR'] else None)
+
+        with st.expander("ℹ️ Explication des résultats"):
+            st.markdown("""
+                - **Fair Price** : valeur théorique de l’action en fonction du FCF projeté et actualisé.  
+                - **CACGR (taux de croissance annuel composé)** : rendement moyen attendu si l’action atteint le prix cible.  
+                - **Couleur verte/rouge** : indique si le rendement est supérieur au minimum souhaité.  
+                """)
+
+        with tab3:
+            st.subheader("📊 Évolution historique et Fair Price")
+            periode = st.selectbox("Période :", ["1y", "5y", "10y"], index=1)
+            dico = calcul_DCF(tickers, hypothese_croissance, price_fcf_attendu)
+            plot(tickers, dico["Fair price"], periode)
